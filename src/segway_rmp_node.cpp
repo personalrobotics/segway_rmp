@@ -266,7 +266,8 @@ public:
         float yaw_displacement = 
             (ss.integrated_turn_position - this->initial_integrated_turn_position) * 
             degrees_to_radians * this->angular_odom_scale;
-        float yaw_rate = ss.yaw_rate * degrees_to_radians;
+        // reverse yaw axis to match base_link frame fixed axis
+        float yaw_rate = -(ss.yaw_rate * degrees_to_radians); 
         
         // Integrate the displacements over time
         // If not the first odometry calculate the delta in displacements
@@ -276,17 +277,17 @@ public:
             float delta_forward_displacement = 
                 forward_displacement - this->last_forward_displacement;
             double delta_time = (current_time-this->last_time).toSec();
-            // Update accumulated odometries and calculate the x and y components 
-            // of velocity
+
+            // Update accumulated odometries and calculate the x velocity
             this->odometry_w = yaw_displacement;
             float delta_odometry_x = 
                 delta_forward_displacement * std::cos(this->odometry_w);
-            vel_x = delta_odometry_x / delta_time;
             this->odometry_x += delta_odometry_x;
             float delta_odometry_y = 
                 delta_forward_displacement * std::sin(this->odometry_w);
-            vel_y = delta_odometry_y / delta_time;
             this->odometry_y += delta_odometry_y;
+
+            vel_x = delta_forward_displacement / delta_time;
         } else {
             this->first_odometry = false;
         }
@@ -461,10 +462,11 @@ private:
         n->param("motor_timeout", this->segway_motor_timeout, 0.5);
         // Get frame id parameter
         n->param("frame_id", frame_id, std::string("base_link"));
+        n->param("odom_frame_id", odom_frame_id, std::string("odom"));
         this->sss_msg.header.frame_id = this->frame_id;
-        this->odom_trans.header.frame_id = "odom";
+        this->odom_trans.header.frame_id = this->odom_frame_id;
         this->odom_trans.child_frame_id = this->frame_id;
-        this->odom_msg.header.frame_id = "odom";
+        this->odom_msg.header.frame_id = this->odom_frame_id;
         this->odom_msg.child_frame_id = this->frame_id;
         // Get cmd_vel inversion parameters
         n->param("invert_linear_vel_cmds", invert_x, false);
@@ -584,6 +586,7 @@ private:
     ros::Timer motor_timeout_timer;
     
     std::string frame_id;
+    std::string odom_frame_id;
     bool invert_x, invert_z;
     bool broadcast_tf;
     
