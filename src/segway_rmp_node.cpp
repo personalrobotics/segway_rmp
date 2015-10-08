@@ -329,6 +329,12 @@ public:
         this->odom_msg.twist.twist.linear.x = vel_x;
         this->odom_msg.twist.twist.linear.y = vel_y;
         this->odom_msg.twist.twist.angular.z = yaw_rate;
+        this->odom_msg.twist.covariance[0] = 0.0025;
+        this->odom_msg.twist.covariance[7] = 0.0025;
+        this->odom_msg.twist.covariance[14] = 1000000000000.0;
+        this->odom_msg.twist.covariance[21] = 1000000000000.0;
+        this->odom_msg.twist.covariance[28] = 1000000000000.0;
+        this->odom_msg.twist.covariance[35] = 0.0025;
         
         this->odom_pub.publish(this->odom_msg);
     }
