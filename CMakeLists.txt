@@ -5,7 +5,6 @@ find_package(catkin REQUIRED
   COMPONENTS
     geometry_msgs
     message_generation
-    message_runtime
     nav_msgs
     roscpp
     serial
@@ -18,7 +17,6 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 find_package(libsegwayrmp REQUIRED)
 
 add_message_files(
-  DIRECTORY msg
   FILES SegwayStatus.msg SegwayStatusStamped.msg
 )
 
@@ -34,6 +32,7 @@ catkin_package(
   DEPENDS libsegwayrmp
   CATKIN_DEPENDS
     geometry_msgs
+    message_runtime
     nav_msgs
     roscpp
     serial
